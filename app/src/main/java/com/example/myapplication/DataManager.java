@@ -74,14 +74,9 @@ public class DataManager {
         RemainingRooms.clear();
     }
 
-    public static void ResetCompletedRooms(){
-        for(int i = 0; i<299; i++){
-        CompletedRooms.set(i, new String[] {String.valueOf(i), "time", "00000000"});
-    }}
-
     public void LoadAllData() {
         for(int i = 0; i<299; i++){
-            CompletedRooms.add(new String[] {String.valueOf(i), "time", "00000000"});
+            //CompletedRooms.add(new String[] {String.valueOf(i), "time", "00000000"});
             Rooms.add(new Room());
         }
         HashMap<String, HashMap<String, String>> getUsers = net.PullSQL(getAllUsersHT());
@@ -119,6 +114,7 @@ public class DataManager {
             }
         }
     }
+
     public static void finalizeRecord () {
         Net net = new Net();
         HashMap<String, HashMap<String, String>> getRecords = net.PullSQL(getAllTempRecordsHT());
@@ -138,28 +134,34 @@ public class DataManager {
     public static void getUserRecord (){
         Net net = new Net();
         ResetRemainingRooms();
-        ResetCompletedRooms();
+        //ResetCompletedRooms();
+        CompletedRooms.clear();
         HashMap<String, HashMap<String, String>> getRecords = net.PullSQL(getAllTempRecordsHT());
-        DataManager.CompletedRooms.set(0, new String[]{"na", "time", "data"}); //fill the zero slot.
         if(getRecords.containsKey(user.ID)) {
             if (getRecords.get(user.ID).get("date").equals(GetCurDate())) {
                 Record rec = new Record();
                 String[] split = getRecords.get(user.ID).get("data").split(">");
                 String rid = split[split.length - 1].split(";")[0];
                 for (String expand : split) {
-                    DataManager.CompletedRooms.set(Integer.parseInt(expand.split(";")[0]), expand.split(";"));
-                    rec.Data = expand.split(";")[2];
-                    record = rec;
+                    DataManager.CompletedRooms.add(expand.split(";"));
                 }
-                DataManager.room = DataManager.Rooms.get(Integer.parseInt(rid));
+                if(split[split.length - 1].split(";")[1].equals("0")) {
+                    rec.ID = rid;
+                    rec.Time = "0";
+                    rec.Data = split[split.length - 1].split(";")[2];
+                    record = rec;
+                    DataManager.room = DataManager.Rooms.get(Integer.parseInt(rid));
+                }
             }else {
                 finalizeRecord();
             }
         }
         DataManager.RemainingRooms.addAll(Arrays.asList(user.Rooms));
-        for(String[] expand: DataManager.CompletedRooms){
-            if(!expand[1].equals("time")){
-                RemainingRooms.remove(expand[0]);
+        if(DataManager.CompletedRooms.size() > 0) {
+            for (String[] expand : DataManager.CompletedRooms) {
+                if (!expand[1].equals("0")) {
+                    RemainingRooms.remove(expand[0]);
+                }
             }
         }
 

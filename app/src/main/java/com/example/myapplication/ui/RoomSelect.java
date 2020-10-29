@@ -30,6 +30,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.example.myapplication.DataManager.*;
+import static com.example.myapplication.DataManager.CompletedRooms;
+import static com.example.myapplication.DataManager.record;
+import static com.example.myapplication.DataManager.room;
+
 public class RoomSelect extends Fragment {
 
     @Override
@@ -41,24 +46,24 @@ public class RoomSelect extends Fragment {
         LinearLayout roomLayout = root.findViewById(R.id.RoomSelectLayout);
         Button btn;
         final int test;
-        if (DataManager.room != null) {
+        if (room != null && record != null && record.Time.equals("0")) {
             navController.navigate(R.id.fragment_cleaning);
         }
-        if (DataManager.RemainingRooms.isEmpty()) {
-            DataManager.finalizeRecord();
+        if (RemainingRooms.isEmpty()) {
+            finalizeRecord();
             TextView msg = new TextView(getContext());
             msg.setText("You are done cleaning for today!");
             msg.setTextSize(20);
             roomLayout.addView(msg);
         } else {
-            if (DataManager.RemainingRooms.size() <= 4) {
-                test = DataManager.RemainingRooms.size();
+            if (RemainingRooms.size() <= 4) {
+                test = RemainingRooms.size();
             } else {
                 test = 4;
             }
             for (int i = 0; i < test; i++) {
                 btn = new Button(this.getContext());
-                String txt = "Room " + DataManager.RemainingRooms.get(i);
+                String txt = "Room " + RemainingRooms.get(i);
                 btn.setText(txt);
                 btn.setId(i);
                 btn.setTextSize(20);
@@ -67,18 +72,27 @@ public class RoomSelect extends Fragment {
                 btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        int room = Integer.parseInt(DataManager.RemainingRooms.get(finalI));
-                        DataManager.room = DataManager.Rooms.get(room);
-                        if (DataManager.record == null) {
-                            Record record = new Record();
+                        int cRoomIndex = 0;
+                        for(String[] cRoom: DataManager.CompletedRooms){
+
+                            if(cRoom[0].equals(RemainingRooms.get(finalI))){
+                                break;
+                            }
+                            cRoomIndex++;
+                        }
+                        if(cRoomIndex == CompletedRooms.size()){
+                            CompletedRooms.add(new String[]{"0", "0", "0"});
+                        }
+                        room = Rooms.get(Integer.parseInt(RemainingRooms.get(finalI)));
+                        if (record == null) {
+                            record = new Record();
                             record.Data = "00000000";
-                            record.Time = DataManager.GetCurTime();
-                            record.ID = DataManager.RemainingRooms.get(finalI);
+                            record.Time = "0";
+                            record.ID = RemainingRooms.get(finalI);
                             record.isNew = true;
-                            DataManager.CompletedRooms.set(Integer.parseInt(DataManager.RemainingRooms.get(finalI)), new String[]{record.ID, record.Time, record.Data});
-                            DataManager.record = record;
-                            DataManager.RemainingRooms.remove(finalI);
-                            DataManager.UpdateDB();
+                            CompletedRooms.set(cRoomIndex, new String[]{record.ID, record.Time, record.Data});
+                            RemainingRooms.remove(finalI);
+                            UpdateDB();
                         }
                         Log.d("Room click", "Room clicked with ID of: " + DataManager.room.ID);
                         navController.navigate(R.id.fragment_cleaning);
@@ -96,22 +110,35 @@ public class RoomSelect extends Fragment {
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    int id = Integer.parseInt(RoomTxt.getText().toString());
-                    if(!RoomTxt.getText().equals("")){
-                        if(DataManager.RemainingRooms.contains(String.valueOf(id))){
-                            DataManager.room = DataManager.Rooms.get(id);
-                            DataManager.RemainingRooms.remove(String.valueOf(id));
-                            if (DataManager.record == null) {
-                                Record record = new Record();
-                                record.Data = "00000000";
-                                record.Time = DataManager.GetCurTime();
-                                record.ID = DataManager.room.ID;
-                                record.isNew = true;
-                                DataManager.CompletedRooms.set(Integer.parseInt(record.ID), new String[]{record.ID, record.Time, record.Data});
-                                DataManager.record = record;
-                                DataManager.UpdateDB();
+                    if(RoomTxt.getText().length() > 2){
+                        int cRoomIndex = 0;
+                        for(String[] cRoom: DataManager.CompletedRooms){
+
+                            if(cRoom[0].equals(RoomTxt.getText().toString())){
+                                break;
                             }
-                            Log.d("Room click", "Room clicked with ID of: " + DataManager.room.ID);
+                            cRoomIndex++;
+                        }
+                        if(cRoomIndex == CompletedRooms.size()){
+                            CompletedRooms.add(new String[]{"0", "0", "0"});
+                        }
+                        int id = Integer.parseInt(RoomTxt.getText().toString());
+                        if(RemainingRooms.contains(String.valueOf(id))){
+                            if(room == null) {
+                                room = new Room();
+                                room = Rooms.get(id);
+                            }
+                            RemainingRooms.remove(String.valueOf(id));
+                            if (record == null) {
+                                record = new Record();
+                                record.Data = "00000000";
+                                record.Time = "0";
+                                record.ID = room.ID;
+                                record.isNew = true;
+                                CompletedRooms.set(cRoomIndex, new String[]{record.ID, record.Time, record.Data});
+                                UpdateDB();
+                            }
+                            Log.d("Room click", "Room clicked with ID of: " + room.ID);
                             navController.navigate(R.id.fragment_cleaning);
                         }
                     }

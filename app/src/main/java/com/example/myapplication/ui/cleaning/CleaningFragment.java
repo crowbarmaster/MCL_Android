@@ -1,16 +1,11 @@
-package com.example.myapplication.ui.dashboard;
+package com.example.myapplication.ui.cleaning;
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -27,8 +22,11 @@ import com.example.myapplication.ClassTypes.Room;
 import com.example.myapplication.DataManager;
 import com.example.myapplication.R;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static com.example.myapplication.DataManager.CompletedRooms;
 
 public class CleaningFragment extends Fragment {
     public static OnBackPressedCallback onBackPressedCallback;
@@ -44,7 +42,19 @@ public class CleaningFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_cleaning, container, false);
         final TimerTask Updater = new Update();
         new Timer().scheduleAtFixedRate(Updater, 1500, 5000);
-
+        int cRoomIndex = 0;
+        if(CompletedRooms.size() == 0){
+            CompletedRooms.add(new String[]{"0", "0", "0"});
+        }
+        for(String[] cRoom: CompletedRooms){
+            if(cRoom[0].equals(DataManager.room.ID)){
+                break;
+            }
+            cRoomIndex++;
+        }
+        if(cRoomIndex == CompletedRooms.size()){
+            CompletedRooms.add(new String[]{"0", "0", "0"});
+        }
         if(!DataManager.record.Data.equals("00000000")){ dataArr = DataManager.record.Data.toCharArray(); }
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         CompoundButton.OnCheckedChangeListener cblisten = new CompoundButton.OnCheckedChangeListener() {
@@ -57,7 +67,6 @@ public class CleaningFragment extends Fragment {
                     dataArr[buttonView.getId()] = '0';
                 }
                 DataManager.record.Data = String.valueOf(dataArr);
-                DataManager.record.Time = DataManager.GetCurTime();
             }
         };
 
@@ -87,11 +96,12 @@ public class CleaningFragment extends Fragment {
         menu.setId(menuID);
         menu.setTextSize((int)textScale);
         menu.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        final int finalCRoomIndex = cRoomIndex;
         menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Updater.cancel();
-                DataManager.CompletedRooms.set(Integer.parseInt(DataManager.room.ID), new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
+                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
                 if(updateEnabled){DataManager.UpdateDB();}
                 updateEnabled = false;
                 navController.navigate(R.id.navigation_home);
@@ -107,7 +117,7 @@ public class CleaningFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Updater.cancel();
-                DataManager.CompletedRooms.set(Integer.parseInt(DataManager.room.ID), new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
+                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
                 if(updateEnabled){DataManager.UpdateDB();}
                 navController.navigate(R.id.NotesFragments);
             }
@@ -124,7 +134,7 @@ public class CleaningFragment extends Fragment {
             public void onClick(View v) {
                 DataManager.record.Data = String.valueOf(dataArr);
                 DataManager.record.Time = DataManager.GetCurTime();
-                DataManager.CompletedRooms.set(Integer.parseInt(DataManager.room.ID), new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
+                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
                 if(updateEnabled){DataManager.UpdateDB();}
                 updateEnabled = false;
                 DataManager.room = null;
@@ -221,8 +231,19 @@ public class CleaningFragment extends Fragment {
 
         @Override
         public void run() {
+            int cRoomIndex = 0;
+            if(CompletedRooms.size() == 0){
+                CompletedRooms.add(new String[]{"0", "0", "0"});
+            }
+            for(String[] cRoom: CompletedRooms){
+
+                if(cRoom[0].equals(DataManager.room.ID)){
+                    break;
+                }
+                cRoomIndex++;
+            }
             if (DataManager.room != null) {
-                DataManager.CompletedRooms.set(Integer.parseInt(DataManager.room.ID), new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
+                DataManager.CompletedRooms.set(cRoomIndex, new String[]{DataManager.room.ID, "0", String.valueOf(dataArr)});
                 DataManager.UpdateDB();
             }
         }

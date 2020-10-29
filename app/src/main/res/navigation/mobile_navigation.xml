@@ -13,13 +13,13 @@
 
     <fragment
         android:id="@+id/fragment_cleaning"
-        android:name="com.example.myapplication.ui.dashboard.CleaningFragment"
+        android:name="com.example.myapplication.ui.cleaning.CleaningFragment"
         android:label="fragment_cleaning"
         tools:layout="@layout/fragment_cleaning" />
 
     <fragment
         android:id="@+id/NotesFragments"
-        android:name="com.example.myapplication.ui.dashboard.NotesFragment"
+        android:name="com.example.myapplication.ui.cleaning.NotesFragment"
         android:label="fragment_notes"
         tools:layout="@layout/fragment_notes" />
     <fragment
