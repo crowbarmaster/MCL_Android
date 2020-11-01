@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.cleaning;
+package com.example.myapplication.ui.Notes;
 
 import android.content.Intent;
 import android.os.Bundle;

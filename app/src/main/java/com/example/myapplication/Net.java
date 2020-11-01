@@ -11,7 +11,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import android.content.Context;
 import android.os.StrictMode;
 import android.util.Log;
 import android.widget.Toast;
@@ -22,27 +21,24 @@ import org.json.JSONObject;
 
 public class Net {
     public Net (){}
-    public Context NetContext;
 
-    public String PushSQL(HashMap<String, String> map) {
-        String response = "";
+    public void PushSQL(HashMap<String, String> map) {
+        String response;
         String apiPath = "http://69.207.170.153:8237/restsrv/RestController.php?";
         HashMap<String, String> postDataParams = new HashMap<>();
         postDataParams.put("HTTP_ACCEPT", "application/json");
         postDataParams.putAll(map);
         HttpConnectionService service = new HttpConnectionService();
         response = service.sendRequest(apiPath, postDataParams);
-        if (response == "1") {
+        if (response.equals("1")) {
             Log.d("HTTP response", "HTTP cmd passed!");
-            return response;
         }
-        return response;
     }
 
     public HashMap<String, HashMap<String, String>> PullSQL(HashMap<String, String> map) {
         Log.d("PullSQL", "Now pulling SQL");
-        String response = "";
-        String[] split = new String[0];
+        String response;
+        String[] split;
         String apiPath = "http://69.207.170.153:8237/restsrv/RestController.php?";
         HashMap<String, String> postDataParams = new HashMap<>();
         HashMap<String, HashMap<String, String>> map2 = new HashMap<>();
@@ -86,12 +82,6 @@ public class Net {
                                 }
                             }
                         }
-                    }
-                    HashMap<String, String> tmp2map = map2.get(id);
-                    assert tmp2map != null;
-                    for (String name : map2.get(id).keySet()) {
-                        String value = map2.get(id).get(name);
-                      //  Log.d("map hashmap", "Map was ID of: " + id + " " + name + " " + value);
                     }
                 }
             }

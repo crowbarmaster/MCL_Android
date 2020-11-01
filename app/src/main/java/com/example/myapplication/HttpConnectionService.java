@@ -1,7 +1,5 @@
 package com.example.myapplication;
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
+
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -10,24 +8,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
 public class HttpConnectionService {
-    String response = "";
+    StringBuilder response = new StringBuilder();
     URL url;
     HttpURLConnection conn = null;
     int responseCode = 0;
 
     public String sendRequest(String path, HashMap<String, String> params) {
         try {
-      //      Log.d("HttpConnectionService", "Starting process to connect path: " + path);
             url = new URL(path);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("connection", "close");//Jellybean is having an issue on "Keep-Alive" connections
@@ -44,13 +41,13 @@ public class HttpConnectionService {
             e.printStackTrace();
         }
 
-        OutputStream os = null;
+        OutputStream os;
         try {
             if (null != conn) {
                 os = conn.getOutputStream();
 
                 BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
+                        new OutputStreamWriter(os, StandardCharsets.UTF_8));
                 writer.write(getPostDataString(params));
                 writer.flush();
                 writer.close();
@@ -64,7 +61,7 @@ public class HttpConnectionService {
 
         if (responseCode == HttpsURLConnection.HTTP_OK) {
             Log.d("HttpConnectionService", "Connection success to path: " + path);
-            String line;
+            StringBuilder line = new StringBuilder();
             BufferedReader br = null;
 
             //getting the reader instance from connection
@@ -80,24 +77,23 @@ public class HttpConnectionService {
             //reading the response from stream
             try {
                 if (null != br) {
-                    while ((line = br.readLine()) != null) {
-                        response += line;
+                    while ((response.append(br.readLine())) != null) {
                         Log.d("HttpConnectionService", "output: " + line);
                     }
                 }
             } catch (IOException e) {
-                response = "";
-         //       Log.d("HttpConnectionService", "Problem in extracting the result.");
+                response.append("");
+                Log.d("HttpConnectionService", "Problem in extracting the result.");
                 e.printStackTrace();
             }
         } else {
-            response = "";
+            response.append("");
         }
         Log.d("HttpConnectionService", "Response was: " + response);
-        return response;
+        return response.toString();
     }
 
-    private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
+    private String getPostDataString(HashMap<String, String> params) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         try {
@@ -107,14 +103,11 @@ public class HttpConnectionService {
                 else
                     result.append("&");
 
-          //      Log.d("HttpConnectionService", "entry.Key: " + entry.getKey());
-             //   Log.d("HttpConnectionService", "entry.Value: " + entry.getValue());
                 result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
                 result.append("=");
                 result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
             }
         } catch (Exception e) {
-      //      Log.d("HttpConnectionService", "Problem in getPostDataString while handling params.");
             e.printStackTrace();
             return "";
         }

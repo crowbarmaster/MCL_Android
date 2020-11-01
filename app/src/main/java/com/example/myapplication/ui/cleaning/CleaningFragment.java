@@ -22,7 +22,6 @@ import com.example.myapplication.ClassTypes.Room;
 import com.example.myapplication.DataManager;
 import com.example.myapplication.R;
 
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -152,9 +151,7 @@ public class CleaningFragment extends Fragment {
         double height = (displayMetrics.heightPixels * .6) / 8;
         double width = displayMetrics.widthPixels* .95;
         if(width < 0){width = 0;}
-        float scale = displayMetrics.widthPixels * 0.0012f;
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-       // layoutParams.setMargins((int)width, 20, 0, (int)height);
         for (int i = 0; i < Tasks.length; i++) {
             checkBox = new CheckBox(this.getContext());
             checkBox.setText(Tasks[i]);
@@ -171,50 +168,26 @@ public class CleaningFragment extends Fragment {
             Room room = DataManager.room;
             switch (i) {
                 case 0:
-                    if (room.HasS) {
-                        checkBox.setEnabled(true);
-                    } else {
-                        checkBox.setEnabled(false);
-                    }
+                    checkBox.setEnabled(room.HasS);
                     break;
                 case 1:
-                    if (room.HasT) {
-                        checkBox.setEnabled(true);
-                    } else {
-                        checkBox.setEnabled(false);
-                    }
+                    checkBox.setEnabled(room.HasT);
                     break;
                 case 2:
-                    if (room.HasFloor) {
-                        checkBox.setEnabled(true);
-                    } else {
-                        checkBox.setEnabled(false);
-                    }
+                    checkBox.setEnabled(room.HasFloor);
                     break;
                 case 3:
                     checkBox.setEnabled(true);
                     break;
                 case 4:
-                    if (room.HasCarpet) {
-                        checkBox.setEnabled(true);
-                    } else {
-                        checkBox.setEnabled(false);
-                    }
+                    checkBox.setEnabled(room.HasCarpet);
                     break;
                 case 5:
                 case 6:
-                    if (room.HasBRoom) {
-                        checkBox.setEnabled(true);
-                    } else {
-                        checkBox.setEnabled(false);
-                    }
+                    checkBox.setEnabled(room.HasBRoom);
                     break;
                 case 7:
-                    if (room.HasSani) {
-                        checkBox.setEnabled(true);
-                    } else {
-                        checkBox.setEnabled(false);
-                    }
+                    checkBox.setEnabled(room.HasSani);
                     break;
             }
             checkBox.setOnCheckedChangeListener(cblisten);

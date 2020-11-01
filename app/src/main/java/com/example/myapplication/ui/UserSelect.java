@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import android.view.DragAndDropPermissions;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +18,9 @@ import com.example.myapplication.ClassTypes.User;
 import com.example.myapplication.DataManager;
 import com.example.myapplication.R;
 
-public class UserFragment extends Fragment implements View.OnClickListener {
-    public static UserFragment newInstance() {
-        return new UserFragment();
+public class UserSelect extends Fragment implements View.OnClickListener {
+    public static UserSelect newInstance() {
+        return new UserSelect();
     }
 
     @Override
@@ -32,7 +31,7 @@ public class UserFragment extends Fragment implements View.OnClickListener {
         LinearLayout userLayout = root.findViewById(R.id.User_btn_layout);
         Button btn;
         for(final User user: DataManager.Users){
-            String nameStr = "";
+            String nameStr;
             nameStr = user.FirstName+ " " + user.LastName;
             btn = new Button(this.getContext());
             btn.setText(nameStr);

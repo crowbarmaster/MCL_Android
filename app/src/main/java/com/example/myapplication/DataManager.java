@@ -15,7 +15,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -26,7 +25,7 @@ public class DataManager {
     public static Room room;
     public static Record record;
     public static List<User> Users = new ArrayList<>();
-    public static List<Room> Rooms = new ArrayList<Room>(300);
+    public static List<Room> Rooms = new ArrayList<>(300);
     public static List<String[]> CompletedRooms = new ArrayList<>();
     public static List<String> RemainingRooms = new ArrayList<>();
 
@@ -52,20 +51,6 @@ public class DataManager {
         HashMap<String, String> cmd = new HashMap<>();
         cmd.put("cmd", "get");
         cmd.put("val1", "`rooms`");
-        cmd.put("val2", "*");
-        return cmd;
-    }
-    public static HashMap<String, String> getAllRecordsHT(){ // Will also load all notes here.
-        HashMap<String, String> cmd = new HashMap<>();
-        cmd.put("cmd", "get");
-        cmd.put("val1", "`records`");
-        cmd.put("val2", "*");
-        return cmd;
-    }
-    public static HashMap<String, String> getAllNotesHT(){ // Will also load all notes here.
-        HashMap<String, String> cmd = new HashMap<>();
-        cmd.put("cmd", "get");
-        cmd.put("val1", "`notes`");
         cmd.put("val2", "*");
         return cmd;
     }
@@ -190,17 +175,17 @@ public class DataManager {
     }
 
     public static String ConcatRecords (List<String[]> inMap) {
-        String outStr = "";
+        StringBuilder outStr = new StringBuilder();
         for (String[] key : inMap) {
-            if( key[1] != "time" || key.length != 3) {
-                if (outStr.equals("")) {
-                    outStr = key[0] + ";" + key[1] + ";" + key[2] + ">";
+            if(!key[1].equals("time") || key.length != 3) {
+                if (outStr.toString().equals("")) {
+                    outStr = new StringBuilder(key[0] + ";" + key[1] + ";" + key[2] + ">");
                 } else {
-                    outStr = outStr + key[0] + ";" + key[1] + ";" + key[2] + ">";
+                    outStr.append(key[0]).append(";").append(key[1]).append(";").append(key[2]).append(">");
                 }
             }
         }
-        return outStr;
+        return outStr.toString();
     }
 
     public static String GetCurDate (){
@@ -215,18 +200,7 @@ public class DataManager {
     }
 
     public boolean charToBool (char in){
-        if(in == '1'){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public char boolToChar (boolean in){
-        if(in){
-            return '1';
-        }
-        return '0';
+        return in == '1';
     }
 
     public String[] readTxt (String abPath) {
@@ -260,17 +234,4 @@ public class DataManager {
             e.printStackTrace();
         }
     }
-
-    public String[] decompileStr (String str, String delim){
-        return str.split(delim);
-    }
-
-    public String compileStr (String[] arr, String delim){
-        String outStr = "";
-        for (String s : arr) {
-            outStr = outStr + s + delim;
-        }
-        return outStr;
-    }
-
 }

@@ -1,13 +1,11 @@
-package com.example.myapplication.ui;
+package com.example.myapplication.ui.cleaning;
 
-import android.Manifest;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import android.renderscript.ScriptGroup;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,15 +18,8 @@ import android.widget.TextView;
 
 import com.example.myapplication.ClassTypes.Record;
 import com.example.myapplication.ClassTypes.Room;
-import com.example.myapplication.ClassTypes.User;
 import com.example.myapplication.DataManager;
-import com.example.myapplication.DataSynchronizer;
-import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static com.example.myapplication.DataManager.*;
 import static com.example.myapplication.DataManager.CompletedRooms;
@@ -52,15 +43,12 @@ public class RoomSelect extends Fragment {
         if (RemainingRooms.isEmpty()) {
             finalizeRecord();
             TextView msg = new TextView(getContext());
-            msg.setText("You are done cleaning for today!");
+            String msgTxt = "You are done cleaning for today!";
+            msg.setText(msgTxt);
             msg.setTextSize(20);
             roomLayout.addView(msg);
         } else {
-            if (RemainingRooms.size() <= 4) {
-                test = RemainingRooms.size();
-            } else {
-                test = 4;
-            }
+            test = Math.min(RemainingRooms.size(), 4);
             for (int i = 0; i < test; i++) {
                 btn = new Button(this.getContext());
                 String txt = "Room " + RemainingRooms.get(i);

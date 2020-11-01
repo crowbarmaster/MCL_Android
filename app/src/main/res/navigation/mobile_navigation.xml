@@ -19,17 +19,17 @@
 
     <fragment
         android:id="@+id/NotesFragments"
-        android:name="com.example.myapplication.ui.cleaning.NotesFragment"
+        android:name="com.example.myapplication.ui.Notes.NotesFragment"
         android:label="fragment_notes"
         tools:layout="@layout/fragment_notes" />
     <fragment
         android:id="@+id/userFragment"
-        android:name="com.example.myapplication.ui.UserFragment"
+        android:name="com.example.myapplication.ui.UserSelect"
         android:label="user_fragment"
         tools:layout="@layout/user_fragment" />
     <fragment
         android:id="@+id/roomSelect"
-        android:name="com.example.myapplication.ui.RoomSelect"
+        android:name="com.example.myapplication.ui.cleaning.RoomSelect"
         android:label="fragment_room_select"
         tools:layout="@layout/fragment_room_select" />
 </navigation>

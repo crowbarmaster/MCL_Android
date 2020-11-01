@@ -3,11 +3,9 @@ package com.example.myapplication.ClassTypes;
 import android.util.Log;
 
 import com.example.myapplication.DataManager;
-import com.example.myapplication.DataSynchronizer;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Note {
