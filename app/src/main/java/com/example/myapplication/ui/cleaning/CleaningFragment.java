@@ -46,7 +46,7 @@ public class CleaningFragment extends Fragment {
             CompletedRooms.add(new String[]{"0", "0", "0"});
         }
         for(String[] cRoom: CompletedRooms){
-            if(cRoom[0].equals(DataManager.room.ID)){
+            if(!DataManager.room.equals(null) && cRoom[0].equals(DataManager.room.ID)){
                 break;
             }
             cRoomIndex++;
