@@ -13,13 +13,13 @@ import java.util.HashMap;
 
 import android.os.StrictMode;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Net {
+
     public Net (){}
 
     public void PushSQL(HashMap<String, String> map) {
@@ -93,7 +93,7 @@ public class Net {
         int serverResponseCode = 0;
         String upLoadServerUri = null;
 
-         public void doUpload (String sourcePath, String destPath){
+         public String doUpload (String sourcePath, String destPath){
              StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
              StrictMode.setThreadPolicy(policy);
              upLoadServerUri = "http://69.207.170.153:8237/UploadToServer.php?";
@@ -118,6 +118,7 @@ public class Net {
 
                      // open a URL connection to the Servlet
                      FileInputStream fileInputStream = new FileInputStream(sourceFile);
+                     String dest = URLEncoder.encode(destPath, "UTF-8");
                      URL url = new URL(upLoadServerUri);
                      // Open a HTTP  connection to  the URL
                      conn = (HttpURLConnection) url.openConnection();
@@ -128,7 +129,7 @@ public class Net {
                      conn.setRequestProperty("Connection", "Keep-Alive");
                      conn.setRequestProperty("ENCTYPE", "multipart/form-data");
                      conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-                     conn.setRequestProperty("uploaded_file", sourcePath);
+                     conn.setRequestProperty("uploaded_file", sourceFile.getAbsolutePath());
 
                      byte[] boundaryBytes =
                              ("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8);
@@ -137,11 +138,11 @@ public class Net {
                          // Send our header (thx Algoman)
                          out.write(boundaryBytes);
 
-                         sendField(out, destPath);
+                         sendField(out, dest);
 
                          out.write(boundaryBytes);
 
-                         out.write(("Content-Disposition: form-data; name=\"uploaded_file\";filename=\"" + sourcePath + "\"" + lineEnd).getBytes(StandardCharsets.UTF_8));
+                         out.write(("Content-Disposition: form-data; name=\"uploaded_file\";filename=\"" + sourceFile.getAbsolutePath() + "\"" + lineEnd).getBytes(StandardCharsets.UTF_8));
 
                          out.write(lineEnd.getBytes(StandardCharsets.UTF_8));
 
@@ -181,6 +182,7 @@ public class Net {
 
                      //close the streams //
                      fileInputStream.close();
+                     conn.disconnect();
 
                  } catch (MalformedURLException ex) {
                      ex.printStackTrace();
@@ -197,10 +199,10 @@ public class Net {
                      Log.e("Upload file Exception", "Exception : " + e.getMessage(), e);
                  }
                  Log.e("Srv_response", String.valueOf(serverResponseCode));
-                 Toast.makeText(MainActivity.CoreContext, "Upload finished, reply: "+serverResponseCode, Toast.LENGTH_LONG).show();
+                 //Toast.makeText(context, "Upload finished, reply: "+serverResponseCode, Toast.LENGTH_LONG).show();
+                 return String.valueOf(serverResponseCode);
              } // End else block
-
-
+             return "error";
          }
 
          private void sendField(OutputStream out, String field) throws IOException {

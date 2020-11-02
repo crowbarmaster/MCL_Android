@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.app.Activity;
 import android.util.Log;
 
 import com.example.myapplication.ClassTypes.Record;
@@ -16,10 +17,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Scanner;
 
-public class DataManager {
+public class DataManager extends Activity {
     public static User user = new User();
     public static User formerUser;
     public static Room room;
@@ -61,7 +61,6 @@ public class DataManager {
 
     public void LoadAllData() {
         for(int i = 0; i<299; i++){
-            //CompletedRooms.add(new String[] {String.valueOf(i), "time", "00000000"});
             Rooms.add(new Room());
         }
         HashMap<String, HashMap<String, String>> getUsers = net.PullSQL(getAllUsersHT());
@@ -196,7 +195,13 @@ public class DataManager {
     public static String GetCurTime (){
         LocalTime localTime = LocalTime.now();
 
-        return localTime.getHour() + "." + localTime.getMinute() + "." + localTime.getSecond();  // using a # instead of : due to JSON array output using :
+        return localTime.getHour() + "." + localTime.getMinute() + "." + localTime.getSecond();  // using a . instead of : due to JSON array output using :
+    }
+
+    public static String GetCurTimeMilli (){
+        LocalTime localTime = LocalTime.now();
+
+        return localTime.getHour() + "." + localTime.getMinute() + "." + localTime.getSecond() + "." + (localTime.getNano() / 1000000);  // using a . instead of : due to JSON array output using :
     }
 
     public boolean charToBool (char in){
@@ -209,8 +214,8 @@ public class DataManager {
         {
             File file = new File(abPath);
             Scanner scanner = new Scanner(file);
+            int i = 0;
             while (scanner.hasNextLine()) {
-                int i = 0;
                 String data = scanner.nextLine();
                 dataArr[i] = data;
                 i++;
@@ -224,7 +229,7 @@ public class DataManager {
     }
 
     public void writeTxt (String name, String input) {
-        File tmpFile = new File(Objects.requireNonNull(MainActivity.CoreContext.getExternalCacheDir()).getAbsolutePath(), name);
+        File tmpFile = new File(getExternalCacheDir().getAbsolutePath(), name);
         try {
             FileWriter fw = new FileWriter(tmpFile);
             fw.write(input);

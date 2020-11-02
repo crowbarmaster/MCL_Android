@@ -18,7 +18,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 public class HttpConnectionService {
-    StringBuilder response = new StringBuilder();
+    String response = "";
     URL url;
     HttpURLConnection conn = null;
     int responseCode = 0;
@@ -37,7 +37,7 @@ public class HttpConnectionService {
             Log.d("HttpConnectionService", "Problem in getting connection.");
             ioe.printStackTrace();
         } catch (Exception e) {
-            Log.d("HttpConnectionService", "Problem in getting connection. Safegaurd catch.");
+            Log.d("HttpConnectionService", "Problem in getting connection. Safeguard catch.");
             e.printStackTrace();
         }
 
@@ -61,7 +61,7 @@ public class HttpConnectionService {
 
         if (responseCode == HttpsURLConnection.HTTP_OK) {
             Log.d("HttpConnectionService", "Connection success to path: " + path);
-            StringBuilder line = new StringBuilder();
+            String line;
             BufferedReader br = null;
 
             //getting the reader instance from connection
@@ -77,20 +77,21 @@ public class HttpConnectionService {
             //reading the response from stream
             try {
                 if (null != br) {
-                    while ((response.append(br.readLine())) != null) {
+                    while ((line = br.readLine()) != null) {
+                        response += line;
                         Log.d("HttpConnectionService", "output: " + line);
                     }
                 }
             } catch (IOException e) {
-                response.append("");
-                Log.d("HttpConnectionService", "Problem in extracting the result.");
+                response = "";
+               Log.d("HttpConnectionService", "Problem in extracting the result.");
                 e.printStackTrace();
             }
         } else {
-            response.append("");
+            response = "";
         }
         Log.d("HttpConnectionService", "Response was: " + response);
-        return response.toString();
+        return response;
     }
 
     private String getPostDataString(HashMap<String, String> params) {

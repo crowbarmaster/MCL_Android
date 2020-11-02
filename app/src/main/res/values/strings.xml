@@ -37,4 +37,12 @@
     <string name="user_lbl">Select user…</string>
     <string name="user_btn">%1$s %2$s</string>
     <string name="RmSelect">Select Starting room…</string>
+    <string name="back">Go back</string>
+    <string name="save">Save</string>
+    <string name="retake">Retake picture</string>
+    <string name="startRec">Start recording</string>
+    <string name="stopRec">Stop recording</string>
+    <string name="playRec">Play recording</string>
+    <string name="stopPlay">Stop playback</string>
+    <string name="saveAudio">Save audio file</string>
 </resources>

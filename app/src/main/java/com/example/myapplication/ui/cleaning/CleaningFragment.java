@@ -100,7 +100,7 @@ public class CleaningFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Updater.cancel();
-                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
+                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, "0", String.valueOf(dataArr)});
                 if(updateEnabled){DataManager.UpdateDB();}
                 updateEnabled = false;
                 navController.navigate(R.id.navigation_home);
@@ -116,7 +116,7 @@ public class CleaningFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Updater.cancel();
-                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
+                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, "0", String.valueOf(dataArr)});
                 if(updateEnabled){DataManager.UpdateDB();}
                 navController.navigate(R.id.NotesFragments);
             }
@@ -158,8 +158,6 @@ public class CleaningFragment extends Fragment {
             checkBox.setId(i);
             checkBox.setTextScaleX(1.3f);
             checkBox.setLayoutParams(layoutParams);
-           // checkBox.setScaleX(1.5f);
-          //  checkBox.setScaleY(1.5f);
             checkBox.setWidth((int)width);
             checkBox.setHeight((int)height);
             if (!String.valueOf(dataArr).equals("00000000")) {

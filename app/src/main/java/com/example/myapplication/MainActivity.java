@@ -21,8 +21,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     public static File CorePath;
-    public static Context CoreContext;
-    private ImageView imgCapture;
+    public Context CoreContext;
     private static final int Image_Capture_Code = 1;
 
     @Override
@@ -40,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        imgCapture = (ImageView) findViewById(R.id.capturedImage);
+        ImageView imgCapture = (ImageView) findViewById(R.id.capturedImage);
         if (requestCode == Image_Capture_Code) {
             if (resultCode == RESULT_OK) {
                 Bitmap bp = (Bitmap) data.getExtras().get("data");
@@ -51,19 +50,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class Update extends TimerTask{
+    private class Update extends TimerTask {
 
         @Override
         public void run() {
-            String txt = "You are not logged in. Please log in to continue.";
-            TextView info = findViewById(R.id.info_box);
-            if (DataManager.user.FirstName != null) {
-                txt = "Welcome, " + DataManager.user.FirstName + " " + DataManager.user.LastName + "! You are logged in.";
-            }
-            if (info != null) {
-                info.setText(txt);
-            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String txt = "You are not logged in. Please log in to continue.";
+                    TextView info = findViewById(R.id.info_box);
+                    if (DataManager.user.FirstName != null) {
+                        txt = "Welcome, " + DataManager.user.FirstName + " " + DataManager.user.LastName + "! You are logged in.";
+                    }
+                    if (info != null) {
+                        info.setText(txt);
+                    }
+                }
+            });
         }
     }
-
 }

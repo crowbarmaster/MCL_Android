@@ -19,7 +19,7 @@
 
     <TextView
         android:id="@+id/info_box"
-        android:layout_width="409dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
         android:text="@string/info_box"

@@ -18,10 +18,12 @@ import com.example.myapplication.DataManager;
 import com.example.myapplication.R;
 
 public class HomeFragment extends Fragment {
+    private NavController navController;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+        navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
         final Context context = this.getContext();
         Button clean = new Button(this.getContext());
         Button review = new Button(this.getContext());
@@ -41,7 +43,6 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
                 if(!DataManager.user.ID.equals("na")) {
                     navController.navigate(R.id.roomSelect);
                 }else{
@@ -56,7 +57,6 @@ public class HomeFragment extends Fragment {
         review.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
 
             }
         });
@@ -68,7 +68,6 @@ public class HomeFragment extends Fragment {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
                 navController.navigate(R.id.userFragment);
             }
         });
