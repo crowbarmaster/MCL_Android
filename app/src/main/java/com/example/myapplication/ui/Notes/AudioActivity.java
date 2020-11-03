@@ -121,7 +121,7 @@ public class AudioActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Net net = new Net();
                 String uploadPath = DataManager.user.LastName+"_"+DataManager.user.ID+"/ROOM_"+DataManager.record.ID+"/Audio/"+DataManager.GetCurDate();
-                if(net.doUpload(audioFile.getAbsolutePath(), uploadPath).equals("200")){
+                if(net.doUpload(audioFile, uploadPath).equals("200")){
                     Toast.makeText(getApplicationContext(), "Saved file to: "+uploadPath, Toast.LENGTH_LONG).show();
                     finish();
                 }
