@@ -93,7 +93,7 @@ public class Net {
         int serverResponseCode = 0;
         String upLoadServerUri = null;
 
-         public String doUpload (String sourcePath, String destPath){
+         public String doUpload (File file, String destPath){
              StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
              StrictMode.setThreadPolicy(policy);
              upLoadServerUri = "http://69.207.170.153:8237/UploadToServer.php?";
@@ -105,12 +105,12 @@ public class Net {
              int bytesRead, bytesAvailable, bufferSize;
              byte[] buffer;
              int maxBufferSize = 1024 * 1024;
-             File sourceFile = new File(sourcePath);
+             File sourceFile = file;
 
              if (!sourceFile.isFile()) {
 
                  Log.e("uploadFile", "Source File not exist :"
-                         + sourcePath);
+                         + sourceFile.getAbsolutePath());
              }
              else
              {
