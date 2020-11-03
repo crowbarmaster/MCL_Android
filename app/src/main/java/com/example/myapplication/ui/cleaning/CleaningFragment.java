@@ -29,7 +29,7 @@ import static com.example.myapplication.DataManager.CompletedRooms;
 
 public class CleaningFragment extends Fragment {
     public static OnBackPressedCallback onBackPressedCallback;
-    public boolean updateEnabled = true;
+    public static boolean updateEnabled = true;
     final DisplayMetrics displayMetrics = new DisplayMetrics();
 
     public boolean charToBool(char in) { return in == '1'; }
@@ -38,8 +38,9 @@ public class CleaningFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_cleaning, container, false);
+        final View root = inflater.inflate(R.layout.fragment_cleaning, container, false);
         final TimerTask Updater = new Update();
+        updateEnabled = true;
         new Timer().scheduleAtFixedRate(Updater, 1500, 5000);
         int cRoomIndex = 0;
         if(CompletedRooms.size() == 0){
@@ -213,7 +214,7 @@ public class CleaningFragment extends Fragment {
                 }
                 cRoomIndex++;
             }
-            if (DataManager.room != null) {
+            if (DataManager.room != null && updateEnabled) {
                 DataManager.CompletedRooms.set(cRoomIndex, new String[]{DataManager.room.ID, "0", String.valueOf(dataArr)});
                 DataManager.UpdateDB();
             }
