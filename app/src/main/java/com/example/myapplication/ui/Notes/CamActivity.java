@@ -75,9 +75,9 @@ public class CamActivity extends AppCompatActivity {
     private Button captureBtn;
     private Button rtnBtn;
     private Boolean retakePic = false;
-    private NavController navController;
     private String capBtnTxt;
-
+    private ImageReader mReader;
+    private CameraCaptureSession.CaptureCallback captureListener;
 
     public CamActivity() {
     }
@@ -87,7 +87,6 @@ public class CamActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cam);
         captureBtn = (Button) findViewById(R.id.btn_capture);
-        capBtnTxt = getString(R.string.capture);
         assert captureBtn != null;
         captureBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,10 +184,17 @@ public class CamActivity extends AppCompatActivity {
         if(retakePic){
             initTexView();
             openCamera();
-            file = new File(Environment.getExternalStorageDirectory() + "/" + DataManager.GetCurTimeMilli()+".jpg");
-            saveBtn.setEnabled(false);
+            file = new File(getDataDir() + "/MCL_TMP/" + DataManager.GetCurTimeMilli()+".jpg");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    saveBtn.setEnabled(false);
+                    retakePic = false;
+                    capBtnTxt = "Capture";
+                    captureBtn.setText(capBtnTxt);
+                }
+            });
             retakePic = false;
-            capBtnTxt = "Capture";
         }
         if (null == cameraDevice) {
             Log.w(TAG, "cameraDevice is null");
@@ -207,16 +213,35 @@ public class CamActivity extends AppCompatActivity {
                 width = jpegSizes[jpegSizes.length - 1].getWidth();
                 height = jpegSizes[jpegSizes.length - 1].getHeight();
             }
-            ImageReader reader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 1);
+            mReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 1);
             List<Surface> outputSurfaces = new ArrayList<>(2);
-            outputSurfaces.add(reader.getSurface());
+            outputSurfaces.add(mReader.getSurface());
             outputSurfaces.add(new Surface(textureView.getSurfaceTexture()));
             final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-            captureBuilder.addTarget(reader.getSurface());
+            captureBuilder.addTarget(mReader.getSurface());
             captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-            // Orientation
+            int hwLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
+            if(hwLevel > 2){
+               captureListener = new CameraCaptureSession.CaptureCallback() {
+                    @Override
+                    public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+                        super.onCaptureCompleted(session, request, result);
+                        Toast.makeText(CamActivity.this, "Saved:" + file, Toast.LENGTH_SHORT).show();
+                        // createCameraPreview();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                saveBtn.setEnabled(true);
+                                capBtnTxt = "Reset";
+                                captureBtn.setText(capBtnTxt);
+                            }
+                        });
+                        retakePic = true;
+                    }
+                };
+            }
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
@@ -236,19 +261,26 @@ public class CamActivity extends AppCompatActivity {
                     }
                 }
             };
-            reader.setOnImageAvailableListener(readerListener, mBackgroundHandler);
-            final CameraCaptureSession.CaptureCallback captureListener = new CameraCaptureSession.CaptureCallback() {
-                @Override
-                public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-                    super.onCaptureCompleted(session, request, result);
-                    Toast.makeText(CamActivity.this, "Saved:" + file, Toast.LENGTH_SHORT).show();
-                   // createCameraPreview();
-                    saveBtn.setEnabled(true);
-                    retakePic = true;
-                    capBtnTxt = "Reset";
-                    closeCamera();
-                }
-            };
+            mReader.setOnImageAvailableListener(readerListener, mBackgroundHandler);
+            if(hwLevel < 3) {
+                captureListener = new CameraCaptureSession.CaptureCallback() {
+                    @Override
+                    public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+                        super.onCaptureCompleted(session, request, result);
+                        Toast.makeText(CamActivity.this, "Saved:" + file, Toast.LENGTH_SHORT).show();
+                        // createCameraPreview();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                saveBtn.setEnabled(true);
+                                capBtnTxt = "Reset";
+                                captureBtn.setText(capBtnTxt);
+                            }
+                        });
+                        retakePic = true;
+                    }
+                };
+            }
             cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
                 @Override
                 public void onConfigured(CameraCaptureSession session) {
@@ -272,8 +304,9 @@ public class CamActivity extends AppCompatActivity {
     protected void savePicture () {
         Net net = new Net();
         String uploadPath = DataManager.user.LastName+"_"+DataManager.user.ID+"/ROOM_"+DataManager.record.ID+"/Images/"+DataManager.GetCurDate();
-        if(net.doUpload(file.getAbsolutePath(), uploadPath).equals("200")){
+        if(net.doUpload(file, uploadPath).equals("200")){
             Toast.makeText(this, "Saved file to: "+uploadPath, Toast.LENGTH_LONG).show();
+            closeCamera();
             finish();
         }
     }
@@ -367,11 +400,6 @@ public class CamActivity extends AppCompatActivity {
         super.onResume();
         Log.w(TAG, "onResume");
         startBackgroundThread();
-        if (textureView.isAvailable()) {
-            openCamera();
-        } else {
-            textureView.setSurfaceTextureListener(textureListener);
-        }
     }
 
     @Override
