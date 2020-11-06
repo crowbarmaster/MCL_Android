@@ -19,9 +19,6 @@ import com.example.myapplication.DataManager;
 import com.example.myapplication.R;
 
 public class UserSelect extends Fragment implements View.OnClickListener {
-    public static UserSelect newInstance() {
-        return new UserSelect();
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

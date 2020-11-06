@@ -1,6 +1,8 @@
 package com.example.myapplication.ui.cleaning;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -39,23 +41,15 @@ public class CleaningFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         final View root = inflater.inflate(R.layout.fragment_cleaning, container, false);
-        final TimerTask Updater = new Update();
         updateEnabled = true;
-        new Timer().scheduleAtFixedRate(Updater, 1500, 5000);
         int cRoomIndex = 0;
-        if(CompletedRooms.size() == 0){
-            CompletedRooms.add(new String[]{"0", "0", "0"});
-        }
         for(String[] cRoom: CompletedRooms){
             if(!DataManager.room.equals(null) && cRoom[0].equals(DataManager.room.ID)){
                 break;
             }
             cRoomIndex++;
         }
-        if(cRoomIndex == CompletedRooms.size()){
-            CompletedRooms.add(new String[]{"0", "0", "0"});
-        }
-        if(!DataManager.record.Data.equals("00000000")){ dataArr = DataManager.record.Data.toCharArray(); }
+        if(!DataManager.record.Data.equals("NA")){ dataArr = DataManager.record.Data.toCharArray(); }
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         CompoundButton.OnCheckedChangeListener cblisten = new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -66,7 +60,9 @@ public class CleaningFragment extends Fragment {
                 } else {
                     dataArr[buttonView.getId()] = '0';
                 }
+                DataManager.record.LastData = String.valueOf(dataArr);
                 DataManager.record.Data = String.valueOf(dataArr);
+                if(updateEnabled){DataManager.UpdateDB();}
             }
         };
 
@@ -77,7 +73,6 @@ public class CleaningFragment extends Fragment {
         onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                Updater.cancel();
                 if(updateEnabled){DataManager.UpdateDB();}
                 updateEnabled = false;
                 navController.navigate(R.id.navigation_home);
@@ -100,8 +95,8 @@ public class CleaningFragment extends Fragment {
         menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Updater.cancel();
-                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, "0", String.valueOf(dataArr)});
+                DataManager.record.LastRoom = DataManager.room.ID;
+                DataManager.record.LastData = DataManager.record.Data;
                 if(updateEnabled){DataManager.UpdateDB();}
                 updateEnabled = false;
                 navController.navigate(R.id.navigation_home);
@@ -116,8 +111,8 @@ public class CleaningFragment extends Fragment {
         notes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Updater.cancel();
-                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, "0", String.valueOf(dataArr)});
+                DataManager.record.LastRoom = DataManager.room.ID;
+                DataManager.record.LastData = DataManager.record.Data;
                 if(updateEnabled){DataManager.UpdateDB();}
                 navController.navigate(R.id.NotesFragments);
             }
@@ -134,12 +129,12 @@ public class CleaningFragment extends Fragment {
             public void onClick(View v) {
                 DataManager.record.Data = String.valueOf(dataArr);
                 DataManager.record.Time = DataManager.GetCurTime();
-                DataManager.CompletedRooms.set(finalCRoomIndex, new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
+                DataManager.CompletedRooms.add(new String[]{DataManager.room.ID, DataManager.GetCurTime(), String.valueOf(dataArr)});
+                DataManager.record.isFinal = true;
                 if(updateEnabled){DataManager.UpdateDB();}
                 updateEnabled = false;
                 DataManager.room = null;
                 DataManager.record = null;
-                Updater.cancel();
                 navController.navigate(R.id.roomSelect);
             }
         });
@@ -159,9 +154,10 @@ public class CleaningFragment extends Fragment {
             checkBox.setId(i);
             checkBox.setTextScaleX(1.3f);
             checkBox.setLayoutParams(layoutParams);
+            checkBox.setBackgroundColor(Color.BLUE);
             checkBox.setWidth((int)width);
             checkBox.setHeight((int)height);
-            if (!String.valueOf(dataArr).equals("00000000")) {
+            if (!String.valueOf(dataArr).equals("NA")) {
                 checkBox.setChecked(charToBool(dataArr[i]));
             }
             Room room = DataManager.room;
@@ -197,27 +193,5 @@ public class CleaningFragment extends Fragment {
         info.setTextSize((int)textScale);
         info.setText(setText);
         return root;
-    }
-
-    private class Update extends TimerTask{
-
-        @Override
-        public void run() {
-            int cRoomIndex = 0;
-            if(CompletedRooms.size() == 0){
-                CompletedRooms.add(new String[]{"0", "0", "0"});
-            }
-            for(String[] cRoom: CompletedRooms){
-
-                if(cRoom[0].equals(DataManager.room.ID)){
-                    break;
-                }
-                cRoomIndex++;
-            }
-            if (DataManager.room != null && updateEnabled) {
-                DataManager.CompletedRooms.set(cRoomIndex, new String[]{DataManager.room.ID, "0", String.valueOf(dataArr)});
-                DataManager.UpdateDB();
-            }
-        }
     }
 }

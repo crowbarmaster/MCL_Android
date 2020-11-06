@@ -116,25 +116,30 @@ public class DataManager extends Activity {
     }
 
     public static void getUserRecord (){
-        Net net = new Net();
         ResetRemainingRooms();
         //ResetCompletedRooms();
         CompletedRooms.clear();
-        HashMap<String, HashMap<String, String>> getRecords = net.PullSQL(getAllTempRecordsHT());
+        HashMap<String, HashMap<String, String>> getRecords = new Net().PullSQL(getAllTempRecordsHT());
         if(getRecords.containsKey(user.ID)) {
             if (getRecords.get(user.ID).get("date").equals(GetCurDate())) {
                 Record rec = new Record();
                 String[] split = getRecords.get(user.ID).get("data").split(">");
                 String rid = split[split.length - 1].split(";")[0];
                 for (String expand : split) {
-                    DataManager.CompletedRooms.add(expand.split(";"));
+                    if(!expand.equals("NA")) {
+                        DataManager.CompletedRooms.add(expand.split(";"));
+                    }
                 }
-                if(split[split.length - 1].split(";")[1].equals("0")) {
-                    rec.ID = rid;
+                if(!getRecords.get(user.ID).get("lastroom").equals("")) {
+                    rec.ID = getRecords.get(user.ID).get("lastroom");
                     rec.Time = "0";
-                    rec.Data = split[split.length - 1].split(";")[2];
+                    rec.Data = getRecords.get(user.ID).get("lastdata");
+                    rec.LastRoom = getRecords.get(user.ID).get("lastroom");
+                    rec.LastData = getRecords.get(user.ID).get("lastdata");
                     record = rec;
-                    DataManager.room = DataManager.Rooms.get(Integer.parseInt(rid));
+                }
+                if(record.LastRoom != null && !record.LastRoom.equals("NA")) {
+                    DataManager.room = DataManager.Rooms.get(Integer.parseInt(rec.LastRoom));
                 }
             }else {
                 finalizeRecord();
@@ -143,31 +148,38 @@ public class DataManager extends Activity {
         DataManager.RemainingRooms.addAll(Arrays.asList(user.Rooms));
         if(DataManager.CompletedRooms.size() > 0) {
             for (String[] expand : DataManager.CompletedRooms) {
-                if (!expand[1].equals("0")) {
                     RemainingRooms.remove(expand[0]);
-                }
+            }
+            if(record.LastRoom != null && !record.LastRoom.equals("")){
+                RemainingRooms.remove(record.LastRoom);
             }
         }
 
     }
 
-    public static void UpdateDB (){
-        Net net = new Net();
+    public static void UpdateDB () {
         HashMap<String, String> cmd = new HashMap<>();
-        if(record != null && record.isNew) {
+        if (record != null && record.isNew) {
             cmd.put("cmd", "ins");
             cmd.put("val1", "`pending_records`");
-            cmd.put("val2", "`userid`, `date`, `data`");
-            cmd.put("val3", "'" + user.ID + "', '" + GetCurDate() + "', '" + ConcatRecords(CompletedRooms) + "'");
-            net.PushSQL(cmd);
+            cmd.put("val2", "`userid`, `date`, `data`, `lastroom`, `lastdata`");
+            cmd.put("val3", "'" + user.ID + "', '" + GetCurDate() + "', '0', '" + record.LastRoom + "', '" + record.LastData + "'");
+            new Net().PushSQL(cmd);
             record.isNew = false;
             Log.d("UpdateDB", "Adding record with user ID: " + user.ID);
-        }else {
+        } else if (record.isFinal) {
             cmd.put("cmd", "set");
             cmd.put("val1", "`pending_records`");
-            cmd.put("val2", "`date`='"+GetCurDate()+"', `data`='"+ConcatRecords(CompletedRooms)+"'");
+            cmd.put("val2", "`data`='" + ConcatRecords(CompletedRooms) + "', `lastroom`='NA', `lastdata`='NA'");
             cmd.put("val3", "userid="+user.ID);
-            net.PushSQL(cmd);
+            new Net().PushSQL(cmd);
+        }
+        else {
+            cmd.put("cmd", "set");
+            cmd.put("val1", "`pending_records`");
+            cmd.put("val2", "`lastroom`='" + record.LastRoom + "', `lastdata`='" + record.LastData + "'");
+            cmd.put("val3", "userid="+user.ID);
+            new Net().PushSQL(cmd);
             Log.d("UpdateDB", "Updating record with user ID: "+ user.ID);
 
         }
@@ -176,7 +188,7 @@ public class DataManager extends Activity {
     public static String ConcatRecords (List<String[]> inMap) {
         StringBuilder outStr = new StringBuilder();
         for (String[] key : inMap) {
-            if(!key[1].equals("time") || key.length != 3) {
+            if(!key[1].equals("0") || key.length != 3) {
                 if (outStr.toString().equals("")) {
                     outStr = new StringBuilder(key[0] + ";" + key[1] + ";" + key[2] + ">");
                 } else {
@@ -185,6 +197,16 @@ public class DataManager extends Activity {
             }
         }
         return outStr.toString();
+    }
+
+    public void removeLastRoom (String userID){
+        HashMap<String, String> cmd = new HashMap<>();
+        cmd.put("cmd", "set");
+        cmd.put("val1", "`pending_records`");
+        cmd.put("val2", "`lastroom`='NA', `lastdata`='NA'");
+        cmd.put("val3", "userid="+user.ID);
+        new Net().PushSQL(cmd);
+        Log.d("UpdateDB", "Updating record with user ID: "+ user.ID);
     }
 
     public static String GetCurDate (){

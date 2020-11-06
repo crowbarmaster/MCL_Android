@@ -76,7 +76,7 @@ public class Net {
                        //     Log.d("Net", "LOG: " + tmp[x]);
                             if (!tmp[x].equals("\"notes\":\"\"")) {
                                 tmp2 = tmp[x].replace("\"", "").split(":");
-                                if (tmp2.length > 0 && !tmp2[1].equals("\"notes\":\"\"")) {
+                                if (tmp2.length > 0) {
                                     map2.get(id).put(tmp2[0], tmp2[1]);
                                    // Log.d("map2 put", "put was: " + tmp2[0] + " " + tmp2[1] + " split len: " + split.length + " " + tmp.length);
                                 }
@@ -105,23 +105,21 @@ public class Net {
              int bytesRead, bytesAvailable, bufferSize;
              byte[] buffer;
              int maxBufferSize = 1024 * 1024;
-             File sourceFile = file;
 
-             if (!sourceFile.isFile()) {
+             if (!file.isFile()) {
 
                  Log.e("uploadFile", "Source File not exist :"
-                         + sourceFile.getAbsolutePath());
+                         + file.getAbsolutePath());
              }
              else
              {
                  try {
 
                      // open a URL connection to the Servlet
-                     FileInputStream fileInputStream = new FileInputStream(sourceFile);
+                     FileInputStream fileInputStream = new FileInputStream(file);
                      String dest = URLEncoder.encode(destPath, "UTF-8");
-                     URL url = new URL(upLoadServerUri);
                      // Open a HTTP  connection to  the URL
-                     conn = (HttpURLConnection) url.openConnection();
+                     conn = (HttpURLConnection) new URL(upLoadServerUri).openConnection();
                      conn.setDoInput(true); // Allow Inputs
                      conn.setDoOutput(true); // Allow Outputs
                      conn.setUseCaches(false); // Don't use a Cached Copy
@@ -129,7 +127,7 @@ public class Net {
                      conn.setRequestProperty("Connection", "Keep-Alive");
                      conn.setRequestProperty("ENCTYPE", "multipart/form-data");
                      conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-                     conn.setRequestProperty("uploaded_file", sourceFile.getAbsolutePath());
+                     conn.setRequestProperty("uploaded_file", file.getAbsolutePath());
 
                      byte[] boundaryBytes =
                              ("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8);
@@ -142,7 +140,7 @@ public class Net {
 
                          out.write(boundaryBytes);
 
-                         out.write(("Content-Disposition: form-data; name=\"uploaded_file\";filename=\"" + sourceFile.getAbsolutePath() + "\"" + lineEnd).getBytes(StandardCharsets.UTF_8));
+                         out.write(("Content-Disposition: form-data; name=\"uploaded_file\";filename=\"" + file.getAbsolutePath() + "\"" + lineEnd).getBytes(StandardCharsets.UTF_8));
 
                          out.write(lineEnd.getBytes(StandardCharsets.UTF_8));
 

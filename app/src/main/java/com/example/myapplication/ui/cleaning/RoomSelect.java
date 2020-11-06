@@ -37,7 +37,7 @@ public class RoomSelect extends Fragment {
         LinearLayout roomLayout = root.findViewById(R.id.RoomSelectLayout);
         Button btn;
         final int test;
-        if (room != null && record != null && record.Time.equals("0")) {
+        if (room != null && record != null && !record.LastRoom.equals("NA")) {
             navController.navigate(R.id.fragment_cleaning);
         }
         if (RemainingRooms.isEmpty()) {
@@ -68,17 +68,15 @@ public class RoomSelect extends Fragment {
                             }
                             cRoomIndex++;
                         }
-                        if(cRoomIndex == CompletedRooms.size()){
-                            CompletedRooms.add(new String[]{"0", "0", "0"});
-                        }
                         room = Rooms.get(Integer.parseInt(RemainingRooms.get(finalI)));
                         if (record == null) {
                             record = new Record();
                             record.Data = "00000000";
+                            record.LastData = "00000000";
                             record.Time = "0";
                             record.ID = RemainingRooms.get(finalI);
+                            record.LastRoom = RemainingRooms.get(finalI);
                             record.isNew = true;
-                            CompletedRooms.set(cRoomIndex, new String[]{record.ID, record.Time, record.Data});
                             RemainingRooms.remove(finalI);
                             UpdateDB();
                         }
@@ -107,9 +105,6 @@ public class RoomSelect extends Fragment {
                             }
                             cRoomIndex++;
                         }
-                        if(cRoomIndex == CompletedRooms.size()){
-                            CompletedRooms.add(new String[]{"0", "0", "0"});
-                        }
                         int id = Integer.parseInt(RoomTxt.getText().toString());
                         if(RemainingRooms.contains(String.valueOf(id))){
                             if(room == null) {
@@ -123,7 +118,6 @@ public class RoomSelect extends Fragment {
                                 record.Time = "0";
                                 record.ID = room.ID;
                                 record.isNew = true;
-                                CompletedRooms.set(cRoomIndex, new String[]{record.ID, record.Time, record.Data});
                                 UpdateDB();
                             }
                             Log.d("Room click", "Room clicked with ID of: " + room.ID);
