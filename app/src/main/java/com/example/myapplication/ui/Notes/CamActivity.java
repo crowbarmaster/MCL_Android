@@ -32,6 +32,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
@@ -86,7 +87,7 @@ public class CamActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cam);
-        captureBtn = (Button) findViewById(R.id.btn_capture);
+        captureBtn = findViewById(R.id.btn_capture);
         assert captureBtn != null;
         captureBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,9 +95,9 @@ public class CamActivity extends AppCompatActivity {
                 takePicture();
             }
         });
-        final Button retakeButton = (Button) findViewById(R.id.btn_retake);
-        rtnBtn = (Button) findViewById(R.id.btn_rtn);
-        saveBtn = (Button) findViewById(R.id.btn_save);
+        final Button retakeButton = findViewById(R.id.btn_retake);
+        rtnBtn = findViewById(R.id.btn_rtn);
+        saveBtn = findViewById(R.id.btn_save);
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,11 +105,11 @@ public class CamActivity extends AppCompatActivity {
             }
         });
         initTexView();
-        saveBtn = (Button)findViewById(R.id.btn_save);
+        saveBtn = findViewById(R.id.btn_save);
     }
 
     protected void initTexView() {
-        textureView = (TextureView) findViewById(R.id.texture);
+        textureView = findViewById(R.id.texture);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
     }
@@ -184,7 +185,7 @@ public class CamActivity extends AppCompatActivity {
         if(retakePic){
             initTexView();
             openCamera();
-            file = new File(getDataDir() + "/MCL_TMP/" + DataManager.GetCurTimeMilli()+".jpg");
+            file = new File(ContextCompat.getDataDir(this) + "/MCL_TMP/" + DataManager.GetCurTimeMilli()+".jpg");
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -209,9 +210,17 @@ public class CamActivity extends AppCompatActivity {
             }
             int width = 720;
             int height = 1280;
-            if (jpegSizes != null && 0 < jpegSizes.length) {
-                width = jpegSizes[jpegSizes.length - 1].getWidth();
-                height = jpegSizes[jpegSizes.length - 1].getHeight();
+            for(Size s: jpegSizes) {
+                if (width < s.getWidth()) {
+                    width = s.getWidth();
+                }
+            }
+            for(Size s: jpegSizes) {
+                if (width == s.getWidth()) {
+                    if(height < s.getHeight()){
+                        height = s.getHeight();
+                    }
+                }
             }
             mReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 1);
             List<Surface> outputSurfaces = new ArrayList<>(2);
