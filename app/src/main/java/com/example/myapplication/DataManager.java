@@ -15,9 +15,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.SimpleTimeZone;
 
 public class DataManager extends Activity {
     public static User user = new User();
@@ -126,7 +129,7 @@ public class DataManager extends Activity {
                 String[] split = getRecords.get(user.ID).get("data").split(">");
                 String rid = split[split.length - 1].split(";")[0];
                 for (String expand : split) {
-                    if(!expand.equals("NA")) {
+                    if(!expand.equals("0")) {
                         DataManager.CompletedRooms.add(expand.split(";"));
                     }
                 }
@@ -150,7 +153,7 @@ public class DataManager extends Activity {
             for (String[] expand : DataManager.CompletedRooms) {
                     RemainingRooms.remove(expand[0]);
             }
-            if(record.LastRoom != null && !record.LastRoom.equals("")){
+            if(record.LastRoom != null && !record.LastRoom.equals("NA")){
                 RemainingRooms.remove(record.LastRoom);
             }
         }
@@ -163,7 +166,7 @@ public class DataManager extends Activity {
             cmd.put("cmd", "ins");
             cmd.put("val1", "`pending_records`");
             cmd.put("val2", "`userid`, `date`, `data`, `lastroom`, `lastdata`");
-            cmd.put("val3", "'" + user.ID + "', '" + GetCurDate() + "', '0', '" + record.LastRoom + "', '" + record.LastData + "'");
+            cmd.put("val3", "'" + user.ID + "', '" + GetCurDate() + "', '"+ConcatRecords(CompletedRooms)+"', '" + record.LastRoom + "', '" + record.LastData + "'");
             new Net().PushSQL(cmd);
             record.isNew = false;
             Log.d("UpdateDB", "Adding record with user ID: " + user.ID);
@@ -183,16 +186,19 @@ public class DataManager extends Activity {
             Log.d("UpdateDB", "Updating record with user ID: "+ user.ID);
 
         }
+        getUserRecord();
     }
 
     public static String ConcatRecords (List<String[]> inMap) {
-        StringBuilder outStr = new StringBuilder();
+        StringBuilder outStr = new StringBuilder("0");
         for (String[] key : inMap) {
-            if(!key[1].equals("0") || key.length != 3) {
-                if (outStr.toString().equals("")) {
-                    outStr = new StringBuilder(key[0] + ";" + key[1] + ";" + key[2] + ">");
-                } else {
-                    outStr.append(key[0]).append(";").append(key[1]).append(";").append(key[2]).append(">");
+            if(!key[0].equals("0")) {
+                if (!key[1].equals("0") || key.length != 3) {
+                    if (outStr.toString().equals("0")) {
+                        outStr = new StringBuilder(key[0] + ";" + key[1] + ";" + key[2] + ">");
+                    } else {
+                        outStr.append(key[0]).append(";").append(key[1]).append(";").append(key[2]).append(">");
+                    }
                 }
             }
         }
@@ -210,20 +216,62 @@ public class DataManager extends Activity {
     }
 
     public static String GetCurDate (){
-        LocalDate date = LocalDate.now();
-        return date.getYear() + "-" + date.getMonthValue() + "-" + date.getDayOfMonth();
+        SimpleTimeZone est = new SimpleTimeZone(0, "EST");
+        Calendar calendar = new GregorianCalendar(est);
+        int monthInt = 0;
+        switch (calendar.get(Calendar.MONDAY)){
+            case Calendar.JANUARY:
+                monthInt = 1;
+                break;
+            case Calendar.FEBRUARY:
+                monthInt = 2;
+                break;
+            case Calendar.MARCH:
+                monthInt = 3;
+                break;
+            case Calendar.APRIL:
+                monthInt = 4;
+                break;
+                case Calendar.MAY:
+                monthInt = 5;
+                break;
+            case Calendar.JUNE:
+                monthInt = 6;
+                break;
+            case Calendar.JULY:
+                monthInt = 7;
+                break;
+            case Calendar.AUGUST:
+                monthInt = 8;
+                break;
+            case Calendar.SEPTEMBER:
+                monthInt = 9;
+                break;
+            case Calendar.OCTOBER:
+                monthInt = 10;
+                break;
+            case Calendar.NOVEMBER:
+                monthInt = 11;
+                break;
+            case Calendar.DECEMBER:
+                monthInt = 12;
+                break;
+        }
+        return calendar.get(Calendar.YEAR) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "-" + monthInt;
     }
 
     public static String GetCurTime (){
-        LocalTime localTime = LocalTime.now();
+        SimpleTimeZone est = new SimpleTimeZone(0, "EST");
+        Calendar calendar = new GregorianCalendar(est);
 
-        return localTime.getHour() + "." + localTime.getMinute() + "." + localTime.getSecond();  // using a . instead of : due to JSON array output using :
+        return calendar.get(Calendar.HOUR) + "." + calendar.get(Calendar.MINUTE) + "." + calendar.get(Calendar.SECOND);  // using a . instead of : due to JSON array output using :
     }
 
     public static String GetCurTimeMilli (){
-        LocalTime localTime = LocalTime.now();
+        SimpleTimeZone est = new SimpleTimeZone(0, "EST");
+        Calendar calendar = new GregorianCalendar(est);
 
-        return localTime.getHour() + "." + localTime.getMinute() + "." + localTime.getSecond() + "." + (localTime.getNano() / 1000000);  // using a . instead of : due to JSON array output using :
+        return calendar.get(Calendar.HOUR) + "." + calendar.get(Calendar.MINUTE) + "." + calendar.get(Calendar.SECOND) + "." + calendar.get(Calendar.MILLISECOND);  // using a . instead of : due to JSON array output using :
     }
 
     public boolean charToBool (char in){
