@@ -52,7 +52,7 @@ public class Net {
         if(!response.isEmpty()) {
             try {
                 JSONObject jsonObject = new JSONObject(response);
-                jsonArray = jsonObject.getJSONArray("output");
+                jsonArray = jsonObject.getJSONArray(map.get("val1"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
